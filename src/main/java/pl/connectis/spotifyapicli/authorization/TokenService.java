@@ -1,7 +1,6 @@
 package pl.connectis.spotifyapicli.authorization;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -18,7 +17,7 @@ public class TokenService {
     private static final Token EMPTY_TOKEN = new Token();
     private final AuthorizationStrategy authorizationStrategy;
 
-    public TokenService(@Qualifier("AuthorizationStrategy") AuthorizationStrategy authorizationStrategy) {
+    public TokenService(AuthorizationStrategy authorizationStrategy) {
         this.authorizationStrategy = authorizationStrategy;
     }
 
@@ -26,8 +25,8 @@ public class TokenService {
         Token token = readTokenFromFile();
         if (!isTokenValid(token)) {
             token = authorizationStrategy.authorize();
+            saveTokenToFile(token);
         }
-
         return token;
     }
 

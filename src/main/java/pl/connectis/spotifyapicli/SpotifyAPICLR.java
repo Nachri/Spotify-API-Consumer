@@ -2,7 +2,6 @@ package pl.connectis.spotifyapicli;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
@@ -25,7 +24,7 @@ public class SpotifyAPICLR implements CommandLineRunner {
     private final ApiCallerFactory apiCallerFactory;
 
 
-    public SpotifyAPICLR(@Qualifier("AuthorizationStrategy") AuthorizationStrategy authorization, ApiCallerFactory apiCallerFactory, TokenService tokenService) {
+    public SpotifyAPICLR(AuthorizationStrategy authorization, ApiCallerFactory apiCallerFactory, TokenService tokenService) {
         this.authorization = authorization;
         this.apiCallerFactory = apiCallerFactory;
     }

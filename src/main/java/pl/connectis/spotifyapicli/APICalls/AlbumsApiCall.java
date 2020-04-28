@@ -9,9 +9,6 @@ import pl.connectis.spotifyapicli.dto.Album;
 import pl.connectis.spotifyapicli.dto.PagingObject;
 import pl.connectis.spotifyapicli.dto.Track;
 
-import java.util.Arrays;
-import java.util.Map;
-
 @Slf4j
 public class AlbumsApiCall extends BaseApiCaller<Album> implements ApiCaller {
 
@@ -24,15 +21,6 @@ public class AlbumsApiCall extends BaseApiCaller<Album> implements ApiCaller {
         this.httpHeaders = httpHeaders;
     }
 
-    public void call(String ids) {
-        if (ids.contains(",")) {
-            Map<String, Album[]> albums = getMany(ids);
-            log.info("Album array toString: {}", Arrays.toString(albums.get("albums")));
-        } else {
-            Album album = getOne(ids);
-            log.info("Album toString: {}", album.toString());
-        }
-    }
 
     public PagingObject<Track> getManyTracksFromOneAlbum(String id) {
         String uriManyTracksFromOneAlbum = "https://api.spotify.com/v1/albums/{id}/tracks";

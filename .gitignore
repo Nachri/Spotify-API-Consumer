@@ -33,4 +33,3 @@ build/
 ### Temp/unimportant files ###
 token
 /src/main/resources/
-/src/main/java/pl/connectis/spotifyapicli/SpringServletContext.java

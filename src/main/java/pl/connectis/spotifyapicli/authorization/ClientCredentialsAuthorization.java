@@ -1,6 +1,7 @@
 package pl.connectis.spotifyapicli.authorization;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,11 +14,13 @@ import java.util.Base64;
 
 
 @Slf4j
-@Component("client_credentials")
+@Component
+@ConditionalOnProperty(prefix = "auth", name = "authorizationMethod", havingValue = "client_credentials")
 public class ClientCredentialsAuthorization implements AuthorizationStrategy {
 
     private final RestTemplate restTemplate;
     private final AuthorizationConfig authorizationConfig;
+
 
     public ClientCredentialsAuthorization(RestTemplate restTemplate, AuthorizationConfig authorizationConfig) {
         this.restTemplate = restTemplate;

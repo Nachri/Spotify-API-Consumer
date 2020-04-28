@@ -11,7 +11,6 @@ import pl.connectis.spotifyapicli.dto.Artist;
 import pl.connectis.spotifyapicli.dto.PagingObject;
 import pl.connectis.spotifyapicli.dto.Track;
 
-import java.util.Arrays;
 import java.util.Map;
 
 @Slf4j
@@ -29,15 +28,6 @@ public class ArtistsApiCall extends BaseApiCaller<Artist> implements ApiCaller {
         log.info("ArtistApiCall init.");
     }
 
-    public void call(String ids) {
-        if (ids.contains(",")) {
-            Map<String, Artist[]> artists = getMany(ids);
-            log.info("Artist array toString: {}", Arrays.toString(artists.get("artist")));
-        } else {
-            Artist artist = getOne(ids);
-            log.info("Artist toString: {}", artist.toString());
-        }
-    }
 
     public PagingObject<Album> getManyAlbumsFromOneArtist(String id) {
         String uriManyAlbumsFromOneArtist = "https://api.spotify.com/v1/artists/{id}/albums";

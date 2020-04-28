@@ -1,12 +1,15 @@
 package pl.connectis.spotifyapicli.APICalls;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.Map;
 
+@Slf4j
 public abstract class BaseApiCaller<T> implements ApiCaller {
 
     private final RestTemplate restTemplate;
@@ -21,6 +24,17 @@ public abstract class BaseApiCaller<T> implements ApiCaller {
         this.clazz = clazz;
         this.uriOne = uriOne;
         this.uriMany = uriMany;
+    }
+
+    @Override
+    public void call(String ids) {
+        if (ids.contains(",")) {
+            Map<String, T[]> objects = getMany(ids);
+            log.info("{} array toString: {}", clazz.getName(), Arrays.toString(objects.values().toArray()));
+        } else {
+            T object = getOne(ids);
+            log.info("{} toString: {}", clazz.getName(), object);
+        }
     }
 
     public T getOne(String id) {
