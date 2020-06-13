@@ -15,7 +15,7 @@ import java.util.Base64;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "auth", name = "authorizationMethod", havingValue = "client_credentials")
+@ConditionalOnProperty(prefix = "auth", name = "authorizationMethod", havingValue = "client_credentials", matchIfMissing = true)
 public class ClientCredentialsAuthorization implements AuthorizationStrategy {
 
     private final RestTemplate restTemplate;

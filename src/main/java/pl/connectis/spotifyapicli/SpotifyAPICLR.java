@@ -3,30 +3,35 @@ package pl.connectis.spotifyapicli;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import pl.connectis.spotifyapicli.APICalls.AlbumsApiCall;
-import pl.connectis.spotifyapicli.APICalls.ApiCallerFactory;
 import pl.connectis.spotifyapicli.APICalls.ArtistsApiCall;
+import pl.connectis.spotifyapicli.APICalls.TracksApiCall;
 import pl.connectis.spotifyapicli.authorization.AuthorizationStrategy;
 import pl.connectis.spotifyapicli.authorization.TokenService;
 
+import java.security.InvalidParameterException;
 import java.util.Arrays;
 
-@Lazy
 @Component
 @Slf4j
 @Profile({"!test"})
+
 public class SpotifyAPICLR implements CommandLineRunner {
 
     private final AuthorizationStrategy authorization;
-    private final ApiCallerFactory apiCallerFactory;
+    private final RestTemplate restTemplate;
+    private final HttpHeaders httpHeaders;
 
 
-    public SpotifyAPICLR(AuthorizationStrategy authorization, ApiCallerFactory apiCallerFactory, TokenService tokenService) {
+    public SpotifyAPICLR(AuthorizationStrategy authorization, RestTemplate restTemplate, TokenService tokenService) {
         this.authorization = authorization;
-        this.apiCallerFactory = apiCallerFactory;
+        this.restTemplate = restTemplate;
+        this.httpHeaders = new HttpHeaders();
+        this.httpHeaders.setBearerAuth(tokenService.getToken().getAccessToken());
     }
 
     public void run(String... args) {
@@ -50,32 +55,45 @@ public class SpotifyAPICLR implements CommandLineRunner {
         if (cmd.hasOption("a")) {
             authorization.authorize();
             log.info("Authorization done. Token generated.");
-        } else if (cmd.getArgs().length > 0) {
-            log.info("found args");
-            if (cmd.hasOption("ab") && cmd.getArgs()[0].equals("tracks")) {
-                String id = cmd.getOptionValue(option.getOpt());
-                log.info("Parsed id: {}", id);
-                log.info(((AlbumsApiCall) apiCallerFactory.getCaller(option.getLongOpt())).getManyTracksFromOneAlbum(id).toString());
-            } else if (cmd.hasOption("at")) {
-                String id = cmd.getOptionValue(option.getOpt());
-                log.info("Parsed id: {}", id);
+        } else if (cmd.hasOption("ab")) {
+            String ids = cmd.getOptionValue(option.getOpt());
+            log.info("Parsed id: {}", ids);
+            AlbumsApiCall albumsApiCall = new AlbumsApiCall(restTemplate, httpHeaders);
+            if (cmd.getArgs().length > 0) {
+                log.info("Found args");
+                if (cmd.getArgs()[0].equals("tracks")) {
+                    log.info("{}", albumsApiCall.getAlbumTracks(ids));
+                }
+                log.info("Parsed ids: {}", ids);
+            } else {
+                albumsApiCall.getList(ids);
+            }
+        } else if (cmd.hasOption("at")) {
+            String ids = cmd.getOptionValue(option.getOpt());
+            log.info("Parsed id: {}", ids);
+            ArtistsApiCall artistsApiCall = new ArtistsApiCall(restTemplate, httpHeaders);
+            if (cmd.getArgs().length > 0) {
                 switch (cmd.getArgs()[0]) {
                     case "albums":
-                        log.info(((ArtistsApiCall) apiCallerFactory.getCaller(option.getLongOpt())).getManyAlbumsFromOneArtist(id).toString());
+                        log.info((artistsApiCall.getArtistAlbums(ids).toString()));
                         break;
                     case "top-tracks":
                         String countryCode = cmd.getArgs()[1];
-                        log.info(Arrays.toString(((ArtistsApiCall) apiCallerFactory.getCaller(option.getLongOpt())).getManyTopTracksFromOneArtist(id, countryCode).get("tracks")));
+                        log.info("{}", (artistsApiCall.getArtistTracks(ids, countryCode)));
                         break;
                     case "related-artists":
-                        log.info(Arrays.toString(((ArtistsApiCall) apiCallerFactory.getCaller(option.getLongOpt())).getManyRelatedArtistsFromOneArtist(id).get("artists")));
+                        log.info("{}", (artistsApiCall.getArtistRelatedArtists(ids)));
                         break;
                 }
+            } else {
+                artistsApiCall.getList(ids);
             }
-        } else {
+        } else if (cmd.hasOption("tr")) {
             String ids = cmd.getOptionValue(option.getOpt());
             log.info("Parsed ids: {}", ids);
-            apiCallerFactory.getCaller(option.getLongOpt()).call(ids);
+            new TracksApiCall(restTemplate, httpHeaders).getList(ids);
+        } else {
+            throw new InvalidParameterException("Wrong argument provided.");
         }
         System.exit(0); //for servlet application type
     }
@@ -87,7 +105,7 @@ public class SpotifyAPICLR implements CommandLineRunner {
                 "--track 11dFghVXANMlKmJXsNCb,20I6sIOMTCkB6w7ryavxtO");
         options.addOption("ab", "album", true, "Get album/s info. Optional args: tracks Examples: -ab 41MnTivkwTO3UUJ8DrqEJJ ," +
                 "--album 41MnTivkwTO3UUJ8DrqEJJ,6JWc4iAiJ9FjyK0B59ABb4,6UXCm6bOO4gFlDQZV5yL37");
-        options.addOption("at", "artist", true, "Get artist/s info. Optional arg:  Examples: -at 0OdUWJ0sBjDrqHygGUXeCF, " +
+        options.addOption("at", "artist", true, "Get artist/s info. Optional args: albums, top-tracks, related-artists  Examples: -at 0OdUWJ0sBjDrqHygGUXeCF, " +
                 "--artist 0oSGxfWSnnOXhD2fKuz2Gy,3dBVyJ7JuOMt4GE9607Qin");
         return options;
     }

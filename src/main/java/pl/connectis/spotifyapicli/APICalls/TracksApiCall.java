@@ -7,10 +7,12 @@ import org.springframework.web.client.RestTemplate;
 import pl.connectis.spotifyapicli.dto.Track;
 
 @Slf4j
-public class TracksApiCall extends BaseApiCaller<Track> implements ApiCaller {
+public class TracksApiCall extends BaseApiCaller<Track> {
+
+    public static final String URI_TRACKS = "/tracks?ids={ids}";
 
     public TracksApiCall(RestTemplate restTemplate, HttpHeaders httpHeaders) {
-        super(restTemplate, httpHeaders, Track.class, "/tracks/{id}", "/tracks?ids={ids}");
+        super(restTemplate, httpHeaders, URI_TRACKS);
     }
 }
 
