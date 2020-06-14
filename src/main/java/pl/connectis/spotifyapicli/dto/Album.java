@@ -24,6 +24,7 @@ public class Album {
     private String href;
     private String id;
     private List<Image> images;
+    private String label;
     private String name;
     private Integer popularity;
     @JsonProperty("release_date")

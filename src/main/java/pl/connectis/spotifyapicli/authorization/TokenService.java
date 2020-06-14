@@ -43,7 +43,14 @@ public class TokenService {
         }
     }
 
-    //TODO don't like it I have to every time load Token from file if i want to access it, singleton or bean it anyway? but from bean i have to update values, maybe some lazy load bean?
+    public void deleteTokenFile() {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ex) {
+            log.error("Delete file error " + ex.getMessage() + '\n' + "Path: " + path);
+        }
+    }
+
     private Token readTokenFromFile() {
 
         Token tokenToRead;
@@ -73,8 +80,8 @@ public class TokenService {
 
         return tokenToRead;
     }
-
     //TODO not safe, just checking if such named file exists, doesn't confirm if the file really contains Token data, it's OK for now
+
     public boolean fileExists() {
         return Files.exists(path);
     }
@@ -84,6 +91,5 @@ public class TokenService {
         if (token.getExpirationTimeMillis() == null) return false;
         return token.getExpirationTimeMillis() > System.currentTimeMillis() - 1000L;
     }
-
 
 }

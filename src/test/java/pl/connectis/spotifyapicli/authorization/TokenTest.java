@@ -31,6 +31,7 @@ public class TokenTest {
         Token readToken = tokenService.getToken();
 
         assertEquals(newToken, readToken);
+        tokenService.deleteTokenFile();
     }
 
     @Test
