@@ -6,12 +6,14 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 import pl.connectis.spotifyapicli.dto.Album;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -39,7 +41,8 @@ public class AlbumsAPICallMockTest {
         when(mockResponse.getBody()).thenReturn(albumMock);
 
 
-        List<Album> albums = albumsAPICall.getList("41MnTivkwTO3UUJ8DrqEJJ");
+        List<Album> albums = albumsAPICall.getList(new ParameterizedTypeReference<Map<String, List<Album>>>() {
+        }, "41MnTivkwTO3UUJ8DrqEJJ");
 
         Mockito.verify(mockResponse).getStatusCode();
         Mockito.verify(restTemplate).exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(Album.class), anyString());

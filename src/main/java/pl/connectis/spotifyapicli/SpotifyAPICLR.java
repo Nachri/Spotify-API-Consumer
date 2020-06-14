@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -12,9 +13,14 @@ import pl.connectis.spotifyapicli.APICalls.ArtistsApiCall;
 import pl.connectis.spotifyapicli.APICalls.TracksApiCall;
 import pl.connectis.spotifyapicli.authorization.AuthorizationStrategy;
 import pl.connectis.spotifyapicli.authorization.TokenService;
+import pl.connectis.spotifyapicli.dto.Album;
+import pl.connectis.spotifyapicli.dto.Artist;
+import pl.connectis.spotifyapicli.dto.Track;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -66,7 +72,8 @@ public class SpotifyAPICLR implements CommandLineRunner {
                 }
                 log.info("Parsed ids: {}", ids);
             } else {
-                albumsApiCall.getList(ids);
+                log.info("{}", albumsApiCall.getList(new ParameterizedTypeReference<Map<String, List<Album>>>() {
+                }, ids));
             }
         } else if (cmd.hasOption("at")) {
             String ids = cmd.getOptionValue(option.getOpt());
@@ -86,12 +93,14 @@ public class SpotifyAPICLR implements CommandLineRunner {
                         break;
                 }
             } else {
-                artistsApiCall.getList(ids);
+                log.info("{}", artistsApiCall.getList(new ParameterizedTypeReference<Map<String, List<Artist>>>() {
+                }, ids));
             }
         } else if (cmd.hasOption("tr")) {
             String ids = cmd.getOptionValue(option.getOpt());
             log.info("Parsed ids: {}", ids);
-            new TracksApiCall(restTemplate, httpHeaders).getList(ids);
+            log.info("{}", new TracksApiCall(restTemplate, httpHeaders).getList(new ParameterizedTypeReference<Map<String, List<Track>>>() {
+            }, ids));
         } else {
             throw new InvalidParameterException("Wrong argument provided.");
         }

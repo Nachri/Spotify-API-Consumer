@@ -1,6 +1,7 @@
 package pl.connectis.spotifyapicli.APICalls;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 import pl.connectis.spotifyapicli.dto.Album;
@@ -9,6 +10,7 @@ import pl.connectis.spotifyapicli.dto.PagingObject;
 import pl.connectis.spotifyapicli.dto.Track;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class ArtistsApiCall extends BaseApiCaller<Artist> {
@@ -28,11 +30,13 @@ public class ArtistsApiCall extends BaseApiCaller<Artist> {
     }
 
     public List<Track> getArtistTracks(String id, String countryCode) {
-        return getMany(URI_ARTISTS_TOP_TRACKS, id, countryCode);
+        return getMany(URI_ARTISTS_TOP_TRACKS, new ParameterizedTypeReference<Map<String, List<Track>>>() {
+        }, id, countryCode);
     }
 
     public List<Artist> getArtistRelatedArtists(String id) {
-        return getMany(URI_ARTISTS_RELATED_ARTISTS, id);
+        return getMany(URI_ARTISTS_RELATED_ARTISTS, new ParameterizedTypeReference<Map<String, List<Artist>>>() {
+        }, id);
     }
 
 

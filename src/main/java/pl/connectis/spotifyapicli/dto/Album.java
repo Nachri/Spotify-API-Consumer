@@ -30,7 +30,7 @@ public class Album {
     private String releaseDate;
     @JsonProperty("release_date_precision")
     private String releaseDatePrecision;
-    private PagingObject<List<Track>> tracks;
+    private PagingObject<Track> tracks;
     private String type;
     private String uri;
 }

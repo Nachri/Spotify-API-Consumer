@@ -7,7 +7,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import pl.connectis.spotifyapicli.dto.PagingObject;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,8 +25,8 @@ public abstract class BaseApiCaller<T> implements ApiCaller<T> {
         this.uri = uri;
     }
 
-    public List<T> getList(String ids) {
-        return getMany(uri, ids);
+    public List<T> getList(ParameterizedTypeReference<Map<String, List<T>>> parameterizedTypeReference, String ids) {
+        return getMany(uri, parameterizedTypeReference, ids);
     }
 
     public <S> PagingObject<S> getPage(String url, Object... variables) {
@@ -38,19 +37,18 @@ public abstract class BaseApiCaller<T> implements ApiCaller<T> {
                 .orElse(null);
     }
 
-    public <S> List<S> getMany(String url, Object... variables) {
-        return Optional.of(restTemplate.exchange(url, HttpMethod.GET, httpEntity, new ParameterizedTypeReference<Map<String, S[]>>() {
-        }, variables))
+    public <S> List<S> getMany(String url, ParameterizedTypeReference<Map<String, List<S>>> parameterizedTypeReference, Object... variables) {
+        return Optional.of(restTemplate.exchange(url, HttpMethod.GET, httpEntity, parameterizedTypeReference, variables))
                 .filter(response -> response.getStatusCode() == HttpStatus.OK)
                 .map(ResponseEntity::getBody)
                 .map(this::extractList)
                 .orElse(null);
     }
 
-    private <S> List<S> extractList(Map<String, S[]> map) {
+    private <S> List<S> extractList(Map<String, List<S>> map) {
         return map.values()
                 .stream()
-                .flatMap(Arrays::stream)
+                .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
 }
