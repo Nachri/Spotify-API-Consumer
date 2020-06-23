@@ -1,53 +1,59 @@
 package pl.connectis.spotifyapicli.APICalls;
 
 
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.client.MockRestServiceServer;
+import pl.connectis.spotifyapicli.authorization.TokenService;
 import pl.connectis.spotifyapicli.dto.Album;
-
-import java.util.List;
-import java.util.Map;
+import pl.connectis.spotifyapicli.dto.AlbumList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@SpringBootTest
-@RestClientTest(AlbumsApiCall.class)
+@RunWith(SpringRunner.class)
+@RestClientTest({ApiCallerService.class, TokenService.class})
+@AutoConfigureWebClient(registerRestTemplate = true)
 @ActiveProfiles("test")
 public class AlbumsAPICallMockTest {
 
-    @MockBean
-    private RestTemplate restTemplate;
-    @MockBean
-    private HttpHeaders httpHeaders;
-    private final AlbumsApiCall albumsAPICall = new AlbumsApiCall(restTemplate, httpHeaders);
+    @Autowired
+    private MockRestServiceServer server;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private ApiCallerService apiCallerService;
+
+
+    @Before
+    public void setUp() throws Exception {
+
+        Album albumMock = new Album();
+        albumMock.setId("41MnTivkwTO3UUJ8DrqEJJ");
+
+        String response = objectMapper.writeValueAsString(albumMock);
+
+        this.server.expect(requestTo("/albums?ids=41MnTivkwTO3UUJ8DrqEJJ")).andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+    }
 
     @Test
     public void givenRestTemplateMocked_WhenGetAlbumsInvoked_ThenMockValueReturned() {
-        Album albumMock = new Album();
-        albumMock.setId("41MnTivkwTO3UUJ8DrqEJJ");
-        ResponseEntity<Album> mockResponse = mock(ResponseEntity.class);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(Album.class), anyString()))
-                .thenReturn(mockResponse);
-        when(mockResponse.toString()).thenReturn("MockedResponse");
-        when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(mockResponse.getBody()).thenReturn(albumMock);
 
-
-        List<Album> albums = albumsAPICall.getList(new ParameterizedTypeReference<Map<String, List<Album>>>() {
+        AlbumList albums = this.apiCallerService.getAlbumApiCaller().getList(new ParameterizedTypeReference<AlbumList>() {
         }, "41MnTivkwTO3UUJ8DrqEJJ");
 
-        Mockito.verify(mockResponse).getStatusCode();
-        Mockito.verify(restTemplate).exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(Album.class), anyString());
-
-        assertEquals(albums.get(0).getId(), "41MnTivkwTO3UUJ8DrqEJJ");
+        assertEquals(albums.getAlbums().get(0).getId(), "41MnTivkwTO3UUJ8DrqEJJ");
     }
 
 }

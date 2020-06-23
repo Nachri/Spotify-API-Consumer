@@ -1,23 +1,22 @@
 package pl.connectis.spotifyapicli.APICalls;
 
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
 import pl.connectis.spotifyapicli.authorization.AuthorizationStrategy;
-import pl.connectis.spotifyapicli.authorization.TokenService;
 import pl.connectis.spotifyapicli.dto.Album;
-
-import java.util.List;
-import java.util.Map;
+import pl.connectis.spotifyapicli.dto.AlbumList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class AlbumsAPICallTest {
@@ -26,9 +25,7 @@ public class AlbumsAPICallTest {
     @Autowired
     private AuthorizationStrategy authorization;
     @Autowired
-    private TokenService tokenService;
-    @Autowired
-    private RestTemplate restTemplate;
+    private ApiCallerService apiCallerService;
 
 
     private String ids1 = "41MnTivkwTO3UUJ8DrqEJJ";
@@ -39,10 +36,9 @@ public class AlbumsAPICallTest {
     public void TestIfSpecifiedByIDAlbumGetsReturned() {
         final HttpHeaders httpHeaders = new HttpHeaders();
         authorization.authorize();
-        httpHeaders.setBearerAuth(tokenService.getToken().getAccessToken());
-        final AlbumsApiCall albumsApiCall = new AlbumsApiCall(restTemplate, httpHeaders);
-        Album album = albumsApiCall.getList(new ParameterizedTypeReference<Map<String, List<Album>>>() {
-        }, ids1).get(0);
+        final AlbumsApiCall albumsApiCall = apiCallerService.getAlbumApiCaller();
+        Album album = albumsApiCall.getList(new ParameterizedTypeReference<AlbumList>() {
+        }, ids1).getAlbums().get(0);
         assertEquals(ids1, album.getId());
     }
 
