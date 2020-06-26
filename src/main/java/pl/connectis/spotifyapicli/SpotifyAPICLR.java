@@ -55,25 +55,25 @@ public class SpotifyAPICLR implements CommandLineRunner {
             authorization.authorize();
             log.info("Authorization done. Token generated.");
         } else if (cmd.hasOption("ab")) {
-            AlbumOptionResolution(cmd, option);
+            albumOptionResolution(cmd, option);
         } else if (cmd.hasOption("at")) {
-            ArtistOptionResolution(cmd, option);
+            artistOptionResolution(cmd, option);
         } else if (cmd.hasOption("tr")) {
-            TrackOptionResolution(cmd, option);
+            trackOptionResolution(cmd, option);
         } else {
             throw new InvalidParameterException("Wrong argument provided.");
         }
         System.exit(0); //for servlet application type
     }
 
-    private void TrackOptionResolution(CommandLine cmd, Option option) {
+    private void trackOptionResolution(CommandLine cmd, Option option) {
         String ids = cmd.getOptionValue(option.getOpt());
         log.info("Parsed ids: {}", ids);
         log.info("{}", apiCallerService.getTracksApiCaller().getList(new ParameterizedTypeReference<TrackList>() {
         }, ids));
     }
 
-    private void ArtistOptionResolution(CommandLine cmd, Option option) {
+    private void artistOptionResolution(CommandLine cmd, Option option) {
         String ids = cmd.getOptionValue(option.getOpt());
         log.info("Parsed id: {}", ids);
         ArtistsApiCall artistsApiCall = apiCallerService.getArtistApiCaller();
@@ -96,7 +96,7 @@ public class SpotifyAPICLR implements CommandLineRunner {
         }
     }
 
-    private void AlbumOptionResolution(CommandLine cmd, Option option) {
+    private void albumOptionResolution(CommandLine cmd, Option option) {
         String ids = cmd.getOptionValue(option.getOpt());
         log.info("Parsed id: {}", ids);
         AlbumsApiCall albumsApiCall = apiCallerService.getAlbumApiCaller();
