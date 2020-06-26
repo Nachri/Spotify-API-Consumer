@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ArtistList {
-    private List<Artist> artist;
+    private List<Artist> artists;
 }
